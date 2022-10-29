@@ -1,0 +1,20 @@
+{
+    "jobSchemas": [
+        {
+            "name": "job_example_one",
+            "every": "5m",
+            "args": "test"
+        },
+        {
+            "name": "job_example_two",
+            "every": "5s",
+            "args": "test",
+            "singletonMode": true
+        },
+        {
+            "name": "job_example_three",
+            "cron": "*/5 * * * * *",
+            "args": "test"
+        }
+    ]
+}
