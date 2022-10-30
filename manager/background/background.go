@@ -8,7 +8,7 @@ import (
 
 func Start(deps *di.Container) {
 	for _, schema := range deps.Config.JobSchemas {
-		job := job.New(schema, deps.JobsDispatcher)
+		job := job.New(schema, deps.DelegateDispatcher(schema))
 		deps.JobsStore.Save(job)
 	}
 

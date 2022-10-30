@@ -1,15 +1,28 @@
 {
+    "redis": {
+        "url": "redis://:admin@localhost:6379/0"
+    },
     "jobSchemas": [
         {
-            "name": "job_example_one",
-            "every": "5m",
-            "args": "test"
+            "name": "make_request_every_10_seconds",
+            "every": "10s",
+            "http": {
+                "url": "https://webhook.site/2d235b22-19b2-4836-acf7-dd5b01a7a1f5"
+            },
+            "data": {
+                "params": "test"
+            }
         },
         {
-            "name": "job_example_two",
+            "name": "publish_on_redis_channel_every_5_seconds",
             "every": "5s",
-            "args": "test",
-            "singletonMode": true
+            "singletonMode": true,
+            "redis": {
+                "channel": "test_channel"
+            },
+            "data": {
+                "params": "test"
+            }
         },
         {
             "name": "job_example_three",

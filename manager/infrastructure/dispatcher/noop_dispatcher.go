@@ -13,10 +13,9 @@ func NewNoopJobDispatcher() core.JobsDispatcher {
 	return noopJobsDispatcher{}
 }
 
-func (noopJobsDispatcher) Dispatch(job core.Job) error {
-	log.Printf("job_id: %s started", job.ID())
-	log.Printf("job_definition: %#+v\n", job.Schema())
+func (noopJobsDispatcher) Dispatch(job core.JobDispatch) error {
+	log.Printf("job_name: %s started", job.Name())
 	time.Sleep(15 * time.Second)
-	log.Printf("job_id: %s ended", job.ID())
+	log.Printf("job_name: %s ended", job.Name())
 	return nil
 }

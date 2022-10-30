@@ -3,12 +3,15 @@ package config
 import (
 	"encoding/json"
 	"io/ioutil"
-
-	"github.com/italorfeitosa/jobs-manager-mvp/manager/core"
 )
 
 type Config struct {
-	JobSchemas []core.JobSchema `json:"jobSchemas"`
+	Redis      RedisConfig
+	JobSchemas []JobSchema `json:"jobSchemas"`
+}
+
+type RedisConfig struct {
+	URL string
 }
 
 var config *Config

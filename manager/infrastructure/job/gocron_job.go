@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-co-op/gocron"
+	"github.com/italorfeitosa/jobs-manager-mvp/common/config"
 	"github.com/italorfeitosa/jobs-manager-mvp/common/uuid"
 	"github.com/italorfeitosa/jobs-manager-mvp/manager/core"
 )
@@ -12,16 +13,16 @@ import (
 type gocronJob struct {
 	*gocron.Job
 	id         string
-	schema     core.JobSchema
+	schema     config.JobSchema
 	dispatcher core.JobsDispatcher
 	scheduler  *gocron.Scheduler
 }
 
-func New(schema core.JobSchema, dispatcher core.JobsDispatcher) core.Job {
+func New(schema config.JobSchema, dispatcher core.JobsDispatcher) core.Job {
 	return new(schema, dispatcher)
 }
 
-func new(schema core.JobSchema, dispatcher core.JobsDispatcher) *gocronJob {
+func new(schema config.JobSchema, dispatcher core.JobsDispatcher) *gocronJob {
 	var err error
 
 	id := uuid.New()
@@ -41,7 +42,9 @@ func new(schema core.JobSchema, dispatcher core.JobsDispatcher) *gocronJob {
 		scheduler.CronWithSeconds(schema.Cron)
 	}
 
-	job.Job, err = scheduler.Do(dispatcher.Dispatch, job)
+	job.Job, err = scheduler.Do(func(job core.Job) error {
+		return dispatcher.Dispatch(job.Dispatch())
+	}, job)
 
 	if err != nil {
 		panic(err)
@@ -50,20 +53,23 @@ func new(schema core.JobSchema, dispatcher core.JobsDispatcher) *gocronJob {
 	return job
 }
 
-func (j *gocronJob) ID() string {
-	return j.id
-}
-
 func (j *gocronJob) Name() string {
 	return j.schema.Name
 }
 
-func (j *gocronJob) Schema() core.JobSchema {
-	return j.schema
+func (j *gocronJob) Dispatch() core.JobDispatch {
+
+	return gocronJobDispatch{
+		idempotencyKey: uuid.New(),
+		data:           j.schema.Data,
+		name:           j.Name(),
+		createdAt:      time.Now().UTC(),
+	}
 }
+
 func (j *gocronJob) Run() error {
 	if !j.IsActive() {
-		return fmt.Errorf("job with id %s is inactive", j.ID())
+		return fmt.Errorf("job with name %s is inactive", j.Name())
 	}
 
 	return j.scheduler.RunByTag(j.schema.Name)
@@ -85,4 +91,27 @@ func (j *gocronJob) Stop() {
 
 func (j *gocronJob) IsActive() bool {
 	return j.scheduler.IsRunning()
+}
+
+type gocronJobDispatch struct {
+	name           string
+	data           any
+	idempotencyKey string
+	createdAt      time.Time
+}
+
+func (j gocronJobDispatch) Name() string {
+	return j.name
+}
+
+func (j gocronJobDispatch) IdempotencyKey() string {
+	return j.idempotencyKey
+}
+
+func (j gocronJobDispatch) Data() any {
+	return j.data
+}
+
+func (j gocronJobDispatch) CreatedAt() time.Time {
+	return j.createdAt
 }

@@ -27,10 +27,10 @@ func (r *Jobs) GetAll() []core.Job {
 	return jobs
 }
 
-func (r *Jobs) Get(id string) (core.Job, error) {
-	found, ok := r.jobs.Load(id)
+func (r *Jobs) Get(name string) (core.Job, error) {
+	found, ok := r.jobs.Load(name)
 	if !ok {
-		return nil, fmt.Errorf("job with id: %s not found", id)
+		return nil, fmt.Errorf("job with name: %s not found", name)
 	}
 
 	return found.(core.Job), nil
@@ -44,5 +44,5 @@ func (r *Jobs) ForEach(fn func(core.Job)) {
 }
 
 func (r *Jobs) Save(job core.Job) {
-	r.jobs.Store(job.ID(), job)
+	r.jobs.Store(job.Name(), job)
 }

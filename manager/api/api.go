@@ -29,7 +29,6 @@ func Start(deps *di.Container) {
 
 		for _, jobOnStore := range jobsOnStore {
 			jobs = append(jobs, fiber.Map{
-				"id":        jobOnStore.ID(),
 				"name":      jobOnStore.Name(),
 				"nextRun":   jobOnStore.NextRun(),
 				"lastRun":   jobOnStore.LastRun(),
@@ -42,8 +41,8 @@ func Start(deps *di.Container) {
 		return c.Status(http.StatusOK).JSON(jobs)
 	})
 
-	app.Patch("/v1/jobs/:id/run", func(c *fiber.Ctx) error {
-		job, err := deps.JobsStore.Get(c.Params("id"))
+	app.Patch("/v1/jobs/:name/run", func(c *fiber.Ctx) error {
+		job, err := deps.JobsStore.Get(c.Params("name"))
 		if err != nil {
 			return c.Status(http.StatusNotFound).JSON(fiber.Map{
 				"error": fmt.Errorf("error on get job: %w", err).Error(),
@@ -61,8 +60,8 @@ func Start(deps *di.Container) {
 		return c.SendStatus(http.StatusNoContent)
 	})
 
-	app.Patch("/v1/jobs/:id/stop", func(c *fiber.Ctx) error {
-		job, err := deps.JobsStore.Get(c.Params("id"))
+	app.Patch("/v1/jobs/:name/stop", func(c *fiber.Ctx) error {
+		job, err := deps.JobsStore.Get(c.Params("name"))
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 				"error": fmt.Errorf("error on get job: %w", err).Error(),
@@ -73,8 +72,8 @@ func Start(deps *di.Container) {
 		return c.SendStatus(http.StatusNoContent)
 	})
 
-	app.Patch("/v1/jobs/:id/start", func(c *fiber.Ctx) error {
-		job, err := deps.JobsStore.Get(c.Params("id"))
+	app.Patch("/v1/jobs/:name/start", func(c *fiber.Ctx) error {
+		job, err := deps.JobsStore.Get(c.Params("name"))
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 				"error": fmt.Errorf("error on get job: %w", err).Error(),

@@ -5,9 +5,8 @@ import (
 )
 
 type Job interface {
-	ID() string
 	Name() string
-	Schema() JobSchema
+	Dispatch() JobDispatch
 	Start()
 	Stop()
 	Run() error
@@ -18,10 +17,9 @@ type Job interface {
 	IsActive() bool
 }
 
-type JobSchema struct {
-	Name          string
-	Cron          string
-	Every         string
-	Args          string
-	SingletonMode bool
+type JobDispatch interface {
+	Name() string
+	Data() any
+	IdempotencyKey() string
+	CreatedAt() time.Time
 }
