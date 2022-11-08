@@ -1,25 +1,26 @@
 package dispatcher
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/italorfeitosa/jobs-manager-mvp/manager/core"
 )
 
-type httpJobsDispatcher struct {
+type httpJobDispatcher struct {
 	client *resty.Client
 	url    string
 }
 
-func NewHttpJobsDispatcher(url string) core.JobsDispatcher {
+func NewHttpJobDispatcher(url string) core.JobDispatcher {
 	client := resty.New()
-	return &httpJobsDispatcher{client, url}
+	return &httpJobDispatcher{client, url}
 }
 
-func (h *httpJobsDispatcher) Dispatch(job core.JobDispatch) error {
-
+func (h *httpJobDispatcher) Dispatch(ctx context.Context, job core.JobDispatch) error {
 	response, err := h.client.R().
+		SetContext(ctx).
 		SetBody(map[string]any{
 			"idempotencyKey": job.IdempotencyKey(),
 			"jobName":        job.Name(),

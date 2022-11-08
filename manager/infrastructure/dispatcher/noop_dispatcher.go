@@ -1,19 +1,20 @@
 package dispatcher
 
 import (
+	"context"
 	"log"
 	"time"
 
 	"github.com/italorfeitosa/jobs-manager-mvp/manager/core"
 )
 
-type noopJobsDispatcher struct{}
+type noopJobDispatcher struct{}
 
-func NewNoopJobDispatcher() core.JobsDispatcher {
-	return noopJobsDispatcher{}
+func NewNoopJobDispatcher() core.JobDispatcher {
+	return noopJobDispatcher{}
 }
 
-func (noopJobsDispatcher) Dispatch(job core.JobDispatch) error {
+func (noopJobDispatcher) Dispatch(ctx context.Context, job core.JobDispatch) error {
 	log.Printf("job_name: %s started", job.Name())
 	time.Sleep(15 * time.Second)
 	log.Printf("job_name: %s ended", job.Name())

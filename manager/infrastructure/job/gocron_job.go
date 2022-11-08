@@ -1,7 +1,9 @@
 package job
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/go-co-op/gocron"
@@ -14,15 +16,15 @@ type gocronJob struct {
 	*gocron.Job
 	id         string
 	schema     config.JobSchema
-	dispatcher core.JobsDispatcher
+	dispatcher core.JobDispatcher
 	scheduler  *gocron.Scheduler
 }
 
-func New(schema config.JobSchema, dispatcher core.JobsDispatcher) core.Job {
+func New(schema config.JobSchema, dispatcher core.JobDispatcher) core.Job {
 	return new(schema, dispatcher)
 }
 
-func new(schema config.JobSchema, dispatcher core.JobsDispatcher) *gocronJob {
+func new(schema config.JobSchema, dispatcher core.JobDispatcher) *gocronJob {
 	var err error
 
 	id := uuid.New()
@@ -42,8 +44,13 @@ func new(schema config.JobSchema, dispatcher core.JobsDispatcher) *gocronJob {
 		scheduler.CronWithSeconds(schema.Cron)
 	}
 
-	job.Job, err = scheduler.Do(func(job core.Job) error {
-		return dispatcher.Dispatch(job.Dispatch())
+	if schema.SingletonMode {
+		scheduler.SingletonMode()
+	}
+
+	job.Job, err = scheduler.Do(func(job core.Job) {
+		err := dispatcher.Dispatch(context.Background(), job.Dispatch())
+		log.Printf("err: %#+v\n", err)
 	}, job)
 
 	if err != nil {

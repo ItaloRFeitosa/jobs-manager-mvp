@@ -8,4 +8,31 @@ services:
     ports:
       - '6379:6379'
     restart: unless-stopped
-    command: redis-server --save 60 1 --loglevel warning --requirepass admin
+    networks:
+      - jobs-manager-network
+  manager:
+    build:
+      context: .
+      dockerfile: ./infra/manager/Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - redis
+      - example
+    volumes:
+      - ./:/app
+    networks:
+      - jobs-manager-network
+  example:
+    build:
+      context: .
+      dockerfile: ./infra/example/Dockerfile
+    depends_on:
+      - redis
+    volumes:
+      - ./:/app
+    networks:
+      - jobs-manager-network
+networks: 
+    jobs-manager-network:
+      driver: bridge

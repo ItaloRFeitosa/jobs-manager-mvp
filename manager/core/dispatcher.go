@@ -1,5 +1,7 @@
 package core
 
-type JobsDispatcher interface {
-	Dispatch(job JobDispatch) error
+import "context"
+
+type JobDispatcher interface {
+	Dispatch(ctx context.Context, job JobDispatch) error
 }
